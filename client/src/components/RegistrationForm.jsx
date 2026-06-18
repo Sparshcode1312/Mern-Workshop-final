@@ -108,7 +108,7 @@ const RegistrationForm = () => {
     setServerMessage('');
 
     try {
-      const response = await fetch('/api/enquiry', {
+      const response = await fetch('https://mern-workshop-final.onrender.com/api/enquiry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
