@@ -9,7 +9,7 @@ export default defineConfig({
     // Proxy API requests to Express backend during development
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://mern-workshop-final.onrender.com',
         changeOrigin: true,
         secure: false,
       },
