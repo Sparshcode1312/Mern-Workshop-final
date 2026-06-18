@@ -63,98 +63,44 @@ const validateFields = ({ name, email, phoneNumber }) => {
  * @desc    Register a new workshop enquiry
  * @access  Public
  */
-router.post('/', async (req, res, next) => {
-  console.log("POST /api/enquiry hit:", req.body);
+router.post('/', async (req, res) => {
   try {
-    console.log("Step 1");
     const { name, email, phoneNumber } = req.body;
 
-    console.log("step 2");
-
-    // Validate inputs
     const errors = validateFields({ name, email, phoneNumber });
     if (errors.length > 0) {
-      return res.status(400).json({ success: false, message: 'Validation failed', errors });
-    }
-
-    const cleanName  = name.trim();
-    const cleanEmail = email.trim().toLowerCase();
-    const cleanPhone = phoneNumber.trim();
-
-    console.log("step 3");
-
-    // ── MongoDB path ──────────────────────────────────────────────────────────
-    if (false) {
-      const Enquiry = require('../models/Enquiry');
-      const enquiry = new Enquiry({ name: cleanName, email: cleanEmail, phoneNumber: cleanPhone });
-      await enquiry.save();
-
-      console.log("step 4");
-
-      return res.status(201).json({
-        success: true,
-        message: '🎉 Registration successful! We will contact you shortly.',
-        data: { id: enquiry._id, name: enquiry.name, email: enquiry.email, createdAt: enquiry.createdAt },
-      });
-    }
-
-    // ── JSON file fallback ────────────────────────────────────────────────────
-    const existing = readJSON();
-
-    // Check for duplicate email
-    if (existing.some((e) => e.email === cleanEmail)) {
-      return res.status(409).json({
+      return res.status(400).json({
         success: false,
-        message: 'An enquiry with this email already exists. We will contact you shortly!',
+        message: 'Validation failed',
+        errors
       });
     }
 
-    const newEntry = {
-      id: `enq_${Date.now()}`,
-      name: cleanName,
-      email: cleanEmail,
-      phoneNumber: cleanPhone,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
+    const newEnquiry = {
+      id: Date.now().toString(),
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      phoneNumber: phoneNumber.trim(),
+      createdAt: new Date().toISOString()
     };
 
-    existing.push(newEntry);
-    writeJSON(existing);
+    global.enquiries = global.enquiries || [];
+    global.enquiries.push(newEnquiry);
+
+    console.log("step 4");
 
     return res.status(201).json({
       success: true,
-      message: '🎉 Registration successful! We will contact you shortly.',
-      data: { id: newEntry.id, name: newEntry.name, email: newEntry.email, createdAt: newEntry.createdAt },
+      message: "Registration successful! We will contact you shortly.",
+      data: newEnquiry
     });
 
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    console.error("ROUTE ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
   }
 });
-
-// ─────────────────────────────────────────────────────────────────────────────
-/**
- * @route   GET /api/enquiry
- * @desc    Get all enquiries (admin use)
- * @access  Public (protect with auth in production)
- */
-router.get('/', async (req, res, next) => {
-  try {
-    if (global.useMongoose) {
-      const Enquiry = require('../models/Enquiry');
-      const enquiries = await Enquiry.find().sort({ createdAt: -1 });
-      return res.status(200).json({ success: true, count: enquiries.length, data: enquiries });
-    }
-
-    // JSON fallback
-    const enquiries = readJSON().sort(
-      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-    );
-    return res.status(200).json({ success: true, count: enquiries.length, data: enquiries });
-
-  } catch (err) {
-    next(err);
-  }
-});
-
 module.exports = router;
