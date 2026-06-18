@@ -121,12 +121,13 @@ const RegistrationForm = () => {
       let data = {};
 
 try {
-  data = await response.json();
-} catch {
+  const text = await response.text();
+  data = text ? JSON.parse(text) : {};
+} catch (err) {
   data = {};
 }
 
-      if (response.ok) {
+if (response.status === 201 || response.ok) {
         setSubmitStatus('success');
         setServerMessage(data.message || '🎉 Registration successful! We will contact you shortly.');
         setForm(INITIAL_FORM);
