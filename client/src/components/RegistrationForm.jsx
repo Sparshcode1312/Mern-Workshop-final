@@ -143,10 +143,10 @@ if (response.status === 201 || response.ok) {
         setServerMessage(msg);
       }
     } catch (networkErr) {
-      setSubmitStatus('error');
-      setServerMessage(
-        'Unable to connect to the server. Please check your connection and try again.'
-      );
+  setSubmitStatus('error');
+  setServerMessage('FRONTEND CATCH ERROR');
+  console.error(networkErr);
+     
       console.error('Submission error:', networkErr);
     }
   };
