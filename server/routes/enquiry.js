@@ -66,7 +66,10 @@ const validateFields = ({ name, email, phoneNumber }) => {
 router.post('/', async (req, res, next) => {
   console.log("POST /api/enquiry hit:", req.body);
   try {
+    console.log("Step 1");
     const { name, email, phoneNumber } = req.body;
+
+    console.log("step 2");
 
     // Validate inputs
     const errors = validateFields({ name, email, phoneNumber });
@@ -78,11 +81,15 @@ router.post('/', async (req, res, next) => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPhone = phoneNumber.trim();
 
+    console.log("step 3");
+
     // ── MongoDB path ──────────────────────────────────────────────────────────
     if (global.useMongoose) {
       const Enquiry = require('../models/Enquiry');
       const enquiry = new Enquiry({ name: cleanName, email: cleanEmail, phoneNumber: cleanPhone });
       await enquiry.save();
+
+      console.log("step 4");
 
       return res.status(201).json({
         success: true,
