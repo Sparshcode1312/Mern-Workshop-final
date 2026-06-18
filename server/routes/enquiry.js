@@ -6,73 +6,40 @@
  *  - Otherwise                      → save to enquiries.json (file fallback)
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const fs = require('fs');
-const path = require('path');
 
-// Path for the JSON fallback file (created automatically if absent)
-const JSON_FILE = path.join(__dirname, '..', 'enquiries.json');
-
-// ── JSON File Helpers ─────────────────────────────────────────────────────────
-
-/** Read all enquiries from the JSON file */
-const readJSON = () => {
-  if (!fs.existsSync(JSON_FILE)) return [];
-  try {
-    return JSON.parse(fs.readFileSync(JSON_FILE, 'utf8'));
-  } catch {
-    return [];
-  }
-};
-
-/** Write enquiries array back to the JSON file */
-const writeJSON = (data) => {
-  fs.writeFileSync(JSON_FILE, JSON.stringify(data, null, 2), 'utf8');
-};
-
-// ── Validation Helpers ────────────────────────────────────────────────────────
-
-const validateFields = ({ name, email, phoneNumber }) => {
+function validateFields({ name, email, phoneNumber }) {
   const errors = [];
 
-  if (!name || name.trim() === '') {
-    errors.push('Name is required');
-  } else if (name.trim().length < 2) {
-    errors.push('Name must be at least 2 characters');
+  if (!name || name.trim().length < 2) {
+    errors.push("Name is required");
   }
 
-  if (!email || email.trim() === '') {
-    errors.push('Email is required');
-  } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email.trim())) {
-    errors.push('Please provide a valid email address');
+  if (!email || !email.includes("@")) {
+    errors.push("Valid email is required");
   }
 
-  if (!phoneNumber || phoneNumber.trim() === '') {
-    errors.push('Phone number is required');
-  } else if (!/^[6-9]\d{9}$/.test(phoneNumber.trim())) {
-    errors.push('Please provide a valid 10-digit Indian phone number');
+  if (!phoneNumber || phoneNumber.trim().length < 10) {
+    errors.push("Valid phone number is required");
   }
 
   return errors;
-};
+}
 
-// ─────────────────────────────────────────────────────────────────────────────
-/**
- * @route   POST /api/enquiry
- * @desc    Register a new workshop enquiry
- * @access  Public
- */
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
+    console.log("POST /api/enquiry hit:", req.body);
+
     const { name, email, phoneNumber } = req.body;
 
     const errors = validateFields({ name, email, phoneNumber });
+
     if (errors.length > 0) {
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
-        errors
+        message: "Validation failed",
+        errors,
       });
     }
 
@@ -81,26 +48,27 @@ router.post('/', async (req, res) => {
       name: name.trim(),
       email: email.trim().toLowerCase(),
       phoneNumber: phoneNumber.trim(),
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     global.enquiries = global.enquiries || [];
     global.enquiries.push(newEnquiry);
 
-    console.log("step 4");
+    console.log("Registration saved:", newEnquiry);
 
     return res.status(201).json({
       success: true,
       message: "Registration successful! We will contact you shortly.",
-      data: newEnquiry
+      data: newEnquiry,
     });
-
   } catch (error) {
     console.error("ROUTE ERROR:", error);
+
     return res.status(500).json({
       success: false,
-      message: "Server error"
+      message: "Server error",
     });
   }
 });
+
 module.exports = router;
