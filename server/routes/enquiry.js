@@ -84,7 +84,7 @@ router.post('/', async (req, res, next) => {
     console.log("step 3");
 
     // ── MongoDB path ──────────────────────────────────────────────────────────
-    if (global.useMongoose) {
+    if (false) {
       const Enquiry = require('../models/Enquiry');
       const enquiry = new Enquiry({ name: cleanName, email: cleanEmail, phoneNumber: cleanPhone });
       await enquiry.save();
