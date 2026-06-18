@@ -118,9 +118,15 @@ const RegistrationForm = () => {
         }),
       });
 
-      const data = await response.json();
+      let data = {};
 
-      if (response.ok && data.success) {
+try {
+  data = await response.json();
+} catch {
+  data = {};
+}
+
+      if (response.ok) {
         setSubmitStatus('success');
         setServerMessage(data.message || '🎉 Registration successful! We will contact you shortly.');
         setForm(INITIAL_FORM);
