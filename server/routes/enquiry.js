@@ -64,6 +64,7 @@ const validateFields = ({ name, email, phoneNumber }) => {
  * @access  Public
  */
 router.post('/', async (req, res, next) => {
+  console.log("POST /api/enquiry hit:", req.body);
   try {
     const { name, email, phoneNumber } = req.body;
 
